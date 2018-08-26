@@ -1,10 +1,14 @@
-Code is the same as at 1-first-steps but a task struct and functions was moved to task.go
+## Description
+It creates 3 tasks and just prints them with `fmt`
 
 ## Key points
 * testing
 * multiline string
 * `init` func
 
-To run use `make run` command
+## Changes
+Task struct and functions was moved to task.go
 
-To test use `make test` command
+## Makefile
+* `make run` - run code
+* `make test` - test code
