@@ -1,0 +1,3 @@
+db:
+  dialect: "sqlite3"
+  database: "./db.sqlite"

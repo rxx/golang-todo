@@ -1,0 +1,6 @@
+create_table("tasks") {
+	t.Column("id", "uuid", {"primary": true})
+	t.Column("title", "text", {})
+	t.Column("when", "text", {})
+	t.Column("status", "text", {})
+}
