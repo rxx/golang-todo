@@ -2,10 +2,11 @@
 It is a full console application
 
 ## Key points
-* cobra
+* cobra commands
+* printf syntax
 
 ## Changes
-Cobra CUI
+Cobra CUI, pretify test output with Errorf
 
 ## Makefile
 * `make build` - build code

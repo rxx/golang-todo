@@ -1,4 +1,4 @@
-package main
+package task
 
 import "testing"
 
@@ -11,12 +11,41 @@ func TestTaskString(t *testing.T) {
 	expectedResult := "Title [open] <tomorrow>"
 
 	if task.String() != expectedResult {
-		t.Error("task.String should return " + expectedResult + "but returns " + task.String())
+		t.Errorf("task.String should return %q but returns %q", expectedResult, task.String())
+	}
+}
+
+func TestTaskListRemove(t *testing.T) {
+	tasks := List{
+		Task{
+			Title:  "Title1",
+			When:   "tomorrow",
+			Status: "open",
+		},
+		Task{
+			Title:  "Title2",
+			When:   "tomorrow",
+			Status: "open",
+		},
+		Task{
+			Title:  "Title3",
+			When:   "tomorrow",
+			Status: "open",
+		},
+	}
+	tasks.Remove(1)
+
+	expectedResult := `1) Title1 [open] <tomorrow>
+2) Title3 [open] <tomorrow>
+`
+
+	if tasks.String() != expectedResult {
+		t.Errorf("task.String should return %q but returns %q", expectedResult, tasks.String())
 	}
 }
 
 func TestTaskListString(t *testing.T) {
-	tasks := TaskList{
+	tasks := List{
 		Task{
 			Title:  "Title1",
 			When:   "tomorrow",
@@ -33,7 +62,7 @@ func TestTaskListString(t *testing.T) {
 `
 
 	if tasks.String() != expectedResult {
-		t.Error("task.String should return " + expectedResult + "but returns " + tasks.String())
+		t.Errorf("task.String should return %q but returns %q", expectedResult, tasks.String())
 	}
 }
 
@@ -41,7 +70,7 @@ func TestNewTask(t *testing.T) {
 	task := NewTask("Title", "tomorrow")
 	expectedTask := Task{Title: "Title", When: "tomorrow", Status: "open"}
 	if task != expectedTask {
-		t.Error("NewTask should create a task " + expectedTask.String() + " but creates " + task.String())
+		t.Errorf("NewTask should create a task %q but creates %q ", expectedTask.String(), task.String())
 	}
 }
 
@@ -49,7 +78,7 @@ func TestSetTitle(t *testing.T) {
 	task := NewTask("Title", "tomorrow")
 	task.SetTitle("New Title")
 	if task.Title != "New Title" {
-		t.Error("Title should set to \"New Title\" but was set to \"" + task.Title + "\"")
+		t.Errorf(`Title should set to "New Title" but was set to %q`, task.Title)
 	}
 }
 
@@ -57,7 +86,7 @@ func TestSetWhen(t *testing.T) {
 	task := NewTask("Title", "tomorrow")
 	task.SetWhen("today")
 	if task.When != "today" {
-		t.Error("When should set to \"today\" but was set to \"" + task.When + "\"")
+		t.Errorf(`When should set to "today" but was set to %q`, task.When)
 	}
 }
 
@@ -65,6 +94,6 @@ func TestClose(t *testing.T) {
 	task := NewTask("Title", "tomorrow")
 	task.Close()
 	if task.Status != "close" {
-		t.Error("Status should be \"close\" but Status is \"" + task.Status + "\"")
+		t.Errorf(`Status should be "close" but status is %q`, task.Status)
 	}
 }
