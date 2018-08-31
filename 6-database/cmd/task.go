@@ -5,20 +5,44 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/rxx/golang-todo/5-cobra/task"
+	"github.com/gobuffalo/pop"
+	"github.com/rxx/golang-todo/6-database/models"
 	"github.com/spf13/cobra"
 )
 
 var (
-	when        string
+	dueDate     string
 	currentTask int
+	tasks       models.Tasks
+	tx          *pop.Connection
+	err         error
 )
+
+func init() {
+	tx, err = pop.Connect("development")
+	if err != nil {
+		panic(err)
+	}
+
+	err = tx.All(&tasks)
+	if err != nil {
+		panic(err)
+	}
+
+	rootCmd.AddCommand(listCmd)
+	rootCmd.AddCommand(addCmd)
+	rootCmd.AddCommand(editTitleCmd)
+	rootCmd.AddCommand(editWhenCmd)
+	rootCmd.AddCommand(closeCmd)
+	rootCmd.AddCommand(removeCmd)
+
+	addCmd.Flags().StringVar(&dueDate, "due_date", "today", "Task due date")
+}
 
 var listCmd = &cobra.Command{
 	Use:   "list",
 	Short: "List all tasks",
 	Run: func(cmd *cobra.Command, args []string) {
-		needToSave = false
 		if len(tasks) < 1 {
 			fmt.Println("No tasks")
 		} else {
@@ -28,14 +52,18 @@ var listCmd = &cobra.Command{
 }
 
 var addCmd = &cobra.Command{
-	Use:   "add title [when]",
+	Use:   "add title [due_date]",
 	Short: `Add new open task`,
 	Args:  cobra.MinimumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		var title string
 		title = strings.Join(args, " ")
-		task := task.NewTask(title, when)
-		tasks = append(tasks, task)
+		task := models.NewTask(title, dueDate)
+
+		err = tx.Create(&task)
+		if err != nil {
+			panic(err)
+		}
 
 		if verbose {
 			fmt.Println("Added a task", task)
@@ -56,8 +84,13 @@ var editTitleCmd = &cobra.Command{
 		title := strings.Join(args[1:], " ")
 		tasks[position-1].SetTitle(title)
 
-		if len(when) > 1 {
-			tasks[position-1].SetWhen(when)
+		if len(dueDate) > 1 {
+			tasks[position-1].SetDueDate(dueDate)
+		}
+
+		err = tx.Update(&tasks[position-1])
+		if err != nil {
+			panic(err)
 		}
 
 		if verbose {
@@ -67,8 +100,8 @@ var editTitleCmd = &cobra.Command{
 }
 
 var editWhenCmd = &cobra.Command{
-	Use:   "edit_when task_position when",
-	Short: "Edit task When",
+	Use:   "edit_due_date task_position dueDate",
+	Short: "Edit task DueDate",
 	Args:  cobra.MinimumNArgs(2),
 	Run: func(cmd *cobra.Command, args []string) {
 		position, err := strconv.Atoi(args[0])
@@ -76,8 +109,12 @@ var editWhenCmd = &cobra.Command{
 			panic(err)
 		}
 
-		when = strings.Join(args[1:], " ")
-		tasks[position-1].SetWhen(when)
+		dueDate = strings.Join(args[1:], " ")
+		tasks[position-1].SetDueDate(dueDate)
+		err = tx.Update(&tasks[position-1])
+		if err != nil {
+			panic(err)
+		}
 
 		if verbose {
 			fmt.Println("Changed task", tasks[position-1])
@@ -96,6 +133,10 @@ var closeCmd = &cobra.Command{
 		}
 
 		tasks[position-1].Close()
+		err = tx.Update(&tasks[position-1])
+		if err != nil {
+			panic(err)
+		}
 
 		if verbose {
 			fmt.Printf("Closed task at %d position\n", position)
@@ -113,21 +154,13 @@ var removeCmd = &cobra.Command{
 			panic(err)
 		}
 
-		tasks.Remove(position - 1)
+		err = tx.Destroy(&tasks[position-1])
+		if err != nil {
+			panic(err)
+		}
 
 		if verbose {
 			fmt.Printf("Removed task at %d position\n", position)
 		}
 	},
-}
-
-func init() {
-	rootCmd.AddCommand(listCmd)
-	rootCmd.AddCommand(addCmd)
-	rootCmd.AddCommand(editTitleCmd)
-	rootCmd.AddCommand(editWhenCmd)
-	rootCmd.AddCommand(closeCmd)
-	rootCmd.AddCommand(removeCmd)
-
-	addCmd.Flags().StringVar(&when, "when", "today", "Task when time")
 }

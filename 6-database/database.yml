@@ -1,3 +1,3 @@
-db:
+development:
   dialect: "sqlite3"
-  database: "./db.sqlite"
+  database: "./development.sqlite"
