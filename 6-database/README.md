@@ -1,12 +1,12 @@
 ## Description
-It is a full console application
+It is a full console application with sqlite3 database
 
 ## Key points
-* cobra commands
-* printf syntax
+* gobuffalo/pop package
+* DB CRUD
 
 ## Changes
-Cobra CUI, pretify test output with Errorf
+Added database instead of files
 
 ## Makefile
 * `make build` - build code
